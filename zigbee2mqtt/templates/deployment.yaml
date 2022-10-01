@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zigbee2mqtt.fullname" . }}
+  labels:
+    {{- include "zigbee2mqtt.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "zigbee2mqtt.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "zigbee2mqtt.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      strategy:
+        type: Recreate
+      serviceAccountName: {{ include "zigbee2mqtt.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT
+              value: /dev/zigbee
+            - name: ZIGBEE2MQTT_CONFIG_DISABLE_LED
+              value: {{ .Values.serial.disable_led | default false | quote }}
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
+              value: "{{ .Values.mqtt.host }}"
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_BASE_TOPIC
+              value: "{{ .Values.mqtt.topic }}" 
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_USER
+              value: "{{ .Values.mqtt.user }}"
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
+              value: "{{ .Values.mqtt.password }}"
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_CLIENT_ID
+              value: "{{ .Values.mqtt.clientId }}"
+            - name: ZIGBEE2MQTT_HOMEASSISTANT
+              value: "true"
+            - name: ZIGBEE2MQTT_PERMIT_JOIN
+              value: {{ .Values.permitJoin | quote }}
+            - name: ZIGBEE2MQTT_FRONTEND_HOST
+              value: "0.0.0.0"
+            - name: ZIGBEE2MQTT_FRONTEND_PORT
+              value: "8080"
+            - name: ZIGBEE2MQTT_ADVANCED_LOG_LEVEL
+              value: "{{ .Values.logLevel }}"
+            - name: ZIGBEE2MQTT_DEVICES
+              value: "devices.yaml"
+            - name: ZIGBEE2MQTT_GROUPS
+              value: "groups.yaml"  
+            - name: ZIGBEE2MQTT_ADVANCED_LOG_OUTPUT
+              value: "console"  
+            - name: ZIGBEE2MQTT_ADVANCED_LOG_DIRECTORY
+              value: "/tmp"  
+            - name: ZIGBEE2MQTT_ADVANCED_LOG_LEVEL
+              value: {{ .Values.logLevel | default "debug" }}
+            - name: ZIGBEE2MQTT_ADVANCED_HOMEASSISTANT_DISCOVERY_TOPIC
+              value: {{ .Values.mqtt.haDiscoveryTopic | default "ha-discovery" }} 
+            {{- range $name, $item := .Values.additionalEnvironmentVariables }}
+            - name: {{ $name }}
+              value: {{ $item }}
+            {{- end }} 
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /dev/zigbee
+              name: dev-zigbee
+            - mountPath: /app/data
+              name: data
+      volumes:
+        - name: dev-zigbee
+          hostPath:
+            path: "{{ .Values.zigbeeDevicePath }}"
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "zigbee2mqtt.fullname" . }}-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      nodeSelector:
+        zigbeeDeviceMounted: "true"

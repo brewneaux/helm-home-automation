@@ -1,0 +1,96 @@
+# Default values for zigbee2mqtt.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+zigbeeDevicePath: /dev/zigbee
+
+logLevel: debug
+permitJoin: false
+serial:
+  disable_led: false
+  adapter: null
+  baudRate: 115200
+mqtt:
+  host: mqtt://mqtt
+  topic: zigbee2mqtt
+  user: mosquitto
+  password: mosquitto
+  clientId: zigbee2mqtt
+
+# Any additional configurations to pass in as environment variables.
+# Should be a map of key: value
+additionalEnvironmentVariables: {}
+    
+
+persistence:
+  enabled: false
+  # enabled: true
+  # size: 2Gi
+  # storageClassName: nfs-client
+
+image:
+  repository: koenkk/zigbee2mqtt
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsGroup: 18
+  runAsUser: 1
+
+  # fsGroup: 2000
+
+securityContext:
+  privileged: true
+
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: 
+    cert-manager.io/cluster-issuer: "letsencrypt"
+  hosts:
+    - host: zigbee2mqtt.k8s.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: 
+   - secretName: zigbee2mqtt-cert
+     hosts:
+       - zigbee2mqtt.k8s.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+
+tolerations: []
+
+affinity: {}
