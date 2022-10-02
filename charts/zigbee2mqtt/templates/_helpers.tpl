@@ -60,3 +60,11 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+
+{{/*
+Define the MQTT Host
+*/}}
+{{- define "zigbee2mqtt.mqttHost" -}}
+{{- .Values.mqtt.host | default  ( printf "mqtt://%s-mqtt" .Release.Name ) }}
+{{- end }}

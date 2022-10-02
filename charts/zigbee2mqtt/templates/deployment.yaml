@@ -9,6 +9,8 @@ spec:
   selector:
     matchLabels:
       {{- include "zigbee2mqtt.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -22,8 +24,6 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      strategy:
-        type: Recreate
       serviceAccountName: {{ include "zigbee2mqtt.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -39,7 +39,7 @@ spec:
             - name: ZIGBEE2MQTT_CONFIG_DISABLE_LED
               value: {{ .Values.serial.disable_led | default false | quote }}
             - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
-              value: "{{ .Values.mqtt.host }}"
+              value: {{ include "zigbee2mqtt.mqttHost" . }}
             - name: ZIGBEE2MQTT_CONFIG_MQTT_BASE_TOPIC
               value: "{{ .Values.mqtt.topic }}" 
             - name: ZIGBEE2MQTT_CONFIG_MQTT_USER

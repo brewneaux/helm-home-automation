@@ -31,7 +31,7 @@ The following table lists mosts of the configurations for the zigbee2mqtt chart.
 | serial.disable_led | disable LED of the adapter if supported (default: false) | false |
 | serial.adapter | # Optional: adapter type, not needed unless you are experiencing problems (default: shown below, options: zstack, deconz, ezsp) | null |
 | serial.baudRate | # Optional: Baud rate speed for serial port, this can be anything firmware support but default is 115200 for Z-Stack and EZSP, 38400 for Deconz, however note that some EZSP firmware need 57600. |  115200 |
-| mqtt.host | Required: MQTT server URL (use mqtts:// for SSL/TLS connection) | mqtt://mqtt |
+| mqtt.host | Optional: MQTT server URL (use mqtts:// for SSL/TLS connection). Defaults to the release name + "-mqtt" | mqtt://{{ .Release.Name }}-mqtt |
 | mqtt.topic | zigbee2mqtt's base_topic option: "Optional: MQTT base topic for Zigbee2MQTT MQTT messages" | zigbee2mqtt |
 | mqtt.user | MQTT authentication user | mosquitto |
 | mqtt.password | MQTT authentication password | mosquitto |
