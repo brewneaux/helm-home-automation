@@ -3,6 +3,16 @@ entries:
   zigbee2mqtt:
   - apiVersion: v2
     appVersion: 1.28.0
+    created: "2022-10-02T03:53:04.45209879Z"
+    description: A Helm chart for Kubernetes
+    digest: 1f03279270fb57f1411b542a3fab248b4bb7dd9166ae00060843baa95fb4161e
+    name: zigbee2mqtt
+    type: application
+    urls:
+    - https://github.com/brewneaux/helm-home-automation/releases/download/zigbee2mqtt-0.1.2/zigbee2mqtt-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: 1.28.0
     created: "2022-10-01T20:42:37.015332365Z"
     description: A Helm chart for Kubernetes
     digest: 4d1db6c49f114384b813cae13ebb176fe4f6f9f70b24e675921a022564984425
